@@ -107,14 +107,115 @@ const viewAll = () => {
         ON m.manager_id = e.employee_id`, (err, res) => {
         if (err) throw err;
         // Log all results of the SELECT statement
-        var resultTable = console.table(res)
-        console.log(resultTable)
+        console.table('\n', res, '\n')
         connection.end();
+        start()
       });
 }
 
 const viewByDepartment = () => {
+    let listOfDepartments = []
+    
+    connection.query(
+        'SELECT * FROM department',
+        (err, results) => {
+            if (err) throw err;
+            var departmentsString = JSON.stringify(results)
+            var parseDepartments= JSON.parse(departmentsString)
+            parseDepartments.forEach(element => {
+                listOfDepartments.push(element.Name)
+            });
+            whichDepartment()
+        }
+    )
 
+    const whichDepartment = () => {
+        inquirer
+        .prompt([
+            {
+                name: 'chooseDepartment',
+                type: 'list',
+                message: 'Choose department',
+                choices: listOfDepartments
+            }
+        ])
+        .then((answer) => {
+            connection.query(
+                `SELECT 
+                employee.employee_id, 
+                CONCAT(employee.first_name, ' ', employee.last_name) as fullName, 
+                role.title as title,
+                role.salary as salary, 
+                department.Name as department
+                From employee
+                JOIN role
+                ON employee.role_id = role.role_id
+                JOIN department
+                ON role.department_id = department.department_id
+                WHERE department.Name = ?`,
+                [answer.chooseDepartment],
+                (err, res) => {
+                    if (err) throw (err);
+                    console.table('\n', res, '\n')
+                    connection.end()
+                    start()
+                }
+            )
+        })
+    }
+    
+}
+
+const viewByManager = () => {
+    let listOfDepartments = []
+    
+    connection.query(
+        'SELECT * FROM department',
+        (err, results) => {
+            if (err) throw err;
+            var departmentsString = JSON.stringify(results)
+            var parseDepartments= JSON.parse(departmentsString)
+            parseDepartments.forEach(element => {
+                listOfDepartments.push(element.Name)
+            });
+            whichDepartment()
+        }
+    )
+
+    const whichDepartment = () => {
+        inquirer
+        .prompt([
+            {
+                name: 'chooseDepartment',
+                type: 'list',
+                message: 'Choose department',
+                choices: listOfDepartments
+            }
+        ])
+        .then((answer) => {
+            connection.query(
+                `SELECT 
+                employee.employee_id, 
+                CONCAT(employee.first_name, ' ', employee.last_name) as fullName, 
+                role.title as title,
+                role.salary as salary, 
+                department.Name as department
+                From employee
+                JOIN role
+                ON employee.role_id = role.role_id
+                JOIN department
+                ON role.department_id = department.department_id
+                WHERE department.Name = ?`,
+                [answer.chooseDepartment],
+                (err, res) => {
+                    if (err) throw (err);
+                    console.table('\n', res, '\n')
+                    connection.end()
+                    start()
+                }
+            )
+        })
+    }
 }
 
 const addEmployee = () => {
@@ -203,6 +304,7 @@ const addEmployee = () => {
                     if (err) throw err;
                     var roleParsed = JSON.parse(JSON.stringify(results))
                     roleId.push(roleParsed[0].role_id)
+                    connection.end()
                     insert()
                 }
             )
@@ -219,6 +321,7 @@ const addEmployee = () => {
                     (err, res) => {
                         if (err) throw err;
                         console.log("Employee Successfully Added")
+                        connection.end()
                         start()
                     }
                 )
@@ -275,6 +378,7 @@ const addRole = () => {
                     if (err) throw err;
                     var departmentParsed = JSON.parse(JSON.stringify(results))
                     departmentId.push(departmentParsed[0].department_id)
+                    connection.end()
                     insert()
                 }
             )
@@ -290,6 +394,7 @@ const addRole = () => {
                     (err, res) => {
                         if (err) throw err;
                         console.log("Role Successfully Added")
+                        connection.end()
                         start()
                     }
                 )
