@@ -89,48 +89,33 @@ const start = () => {
     })
 }
 
-const test = (list) => {
-    //let list = []
-    connection.query(
-        'SELECT * FROM department',
-        (err, results) => {
-            if (err) throw err;
-            var departmentsString = JSON.stringify(results)
-            var parseDepartments= JSON.parse(departmentsString)
-            parseDepartments.forEach(element => {
-                list.push(element.Name)
-                //console.log(list)
-                //console.log(list)
-            });
-            return list
-        }
-    )
-    
-}
-
 const viewAll = () => {
-    let listOfNames = []
-    //test.apply(null, listOfDepartments)
-    // var testing = test(listOfDepartments)
-    // console.log(testing)
-    let listOfManagers = ["No Manager"]
     connection.query(
-        "SELECT first_name, last_name FROM employee WHERE role_id = 3",
-        (err, results) => {
-            if (err) throw err;
-            var parseManagers = JSON.parse(JSON.stringify(results))
-            parseManagers.forEach(element => {
-                listOfManagers.push(element)
-            });
-            console.log(listOfManagers)
-        }
-    )
-    var test = listOfManagers[0].split(" ")
-    var testing = test[0]
-    console.log(test)
-    console.log(testing)
+        `SELECT 
+        e.employee_id, 
+        CONCAT(e.first_name, ' ', e.last_name) as fullName, 
+        role.title as title,
+        role.salary as salary, 
+        department.Name as department,
+        CONCAT(m.first_name, ' ', m.last_name) as Manager
+        From employee e
+        JOIN role
+        ON e.role_id = role.role_id
+        JOIN department
+        ON role.department_id = department.department_id
+        LEFT JOIN employee m
+        ON m.manager_id = e.employee_id`, (err, res) => {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        var resultTable = console.table(res)
+        console.log(resultTable)
+        connection.end();
+      });
 }
 
+const viewByDepartment = () => {
+
+}
 
 const addEmployee = () => {
     //Store a list of roles into a variable from querying the database
@@ -143,18 +128,20 @@ const addEmployee = () => {
             parseRoles.forEach(element => {
                 listOfRoles.push(element.title)
             });
+            connection.end()
         }
     )
 
     let listOfManagers = ["No Manager"]
     connection.query(
-        "SELECT CONCAT(first_name, ' ', last_name) FROM employee WHERE role_id = 3",
+        "SELECT CONCAT(first_name, ' ', last_name) AS fullName FROM employee WHERE role_id = 3",
         (err, results) => {
             if (err) throw err;
             var parseManagers = JSON.parse(JSON.stringify(results))
             parseManagers.forEach(element => {
-                listOfManagers.push(element)
+                listOfManagers.push(element.fullName)
             });
+            connection.end()
         }
     )
 
@@ -184,8 +171,12 @@ const addEmployee = () => {
             }
         ])
         .then((answer) => {
-            //Stores department id for role into a variable
+            //Stores manager id for role into a variable
             let managerId = [];
+
+            //Stores role id for role into a variable
+            let roleId = [];
+
             //Query to get department id
             if (answer.managerName != "No Manager") {
                 var spliting = answer.managerName.split(' ')
@@ -193,44 +184,35 @@ const addEmployee = () => {
                 connection.query(
                     'SELECT employee_id FROM employee WHERE ?',
                     {
-                        Name: managerFirstName
+                        first_name: managerFirstName
                     },
                     (err, results) => {
                         if (err) throw err;
                         var managerParsed = JSON.parse(JSON.stringify(results))
                         managerId.push(managerParsed[0].employee_id)
-                        getRoleID()
                     }
                 )
-            }
-            else {
-                getRoleID()
-            }
- 
-            //Stores department id for role into a variable
-            let roleId = [];
-            //Query to get department id
-            const getRoleID = () => {
-                connection.query(
-                    'SELECT role_id FROM role WHERE ?',
-                    {
-                        title: answer.role
-                    },
-                    (err, results) => {
-                        if (err) throw err;
-                        var roleParsed = JSON.parse(JSON.stringify(results))
-                        roleId.push(roleParsed[0].role_id)
-                        insert()
-                    }
-                )
-            }     
+            }   
+            
+            connection.query(
+                'SELECT role_id FROM role WHERE ?',
+                {
+                    title: answer.role
+                },
+                (err, results) => {
+                    if (err) throw err;
+                    var roleParsed = JSON.parse(JSON.stringify(results))
+                    roleId.push(roleParsed[0].role_id)
+                    insert()
+                }
+            )
 
             const insert = () => {
                 connection.query(
                     'INSERT INTO employee SET ?',
                     {
-                        first_name: answer.title,
-                        last_name: parseFloat(answer.salary),
+                        first_name: answer.firstName,
+                        last_name: answer.lastName,
                         role_id: roleId[0],
                         manager_id: managerId[0]
                     },
@@ -276,7 +258,7 @@ const addRole = () => {
                 name: 'department',
                 type: 'list',
                 message: 'Which department is this role in?',
-                choices: listOfDepartmentNames
+                choices: listOfDepartments
             }
         ])
         .then((answer) => {
@@ -344,3 +326,6 @@ connection.connect((err) => {
     if (err) throw err;
     start();
 })
+
+
+
