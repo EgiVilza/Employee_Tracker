@@ -49,6 +49,7 @@ const start = () => {
                 break;
 
             case 'View all roles':
+                viewRoles()
                 break;
 
             case 'Add employee':
@@ -84,6 +85,7 @@ const start = () => {
                 break;
             
             case 'Quit':
+                connection.end()
                 break;
         }
     })
@@ -104,11 +106,10 @@ const viewAll = () => {
         JOIN department
         ON role.department_id = department.department_id
         LEFT JOIN employee m
-        ON m.manager_id = e.employee_id`, (err, res) => {
+        ON m.employee_id = e.manager_id;`, (err, res) => {
         if (err) throw err;
         // Log all results of the SELECT statement
         console.table('\n', res, '\n')
-        connection.end();
         start()
       });
 }
@@ -157,7 +158,6 @@ const viewByDepartment = () => {
                 (err, res) => {
                     if (err) throw (err);
                     console.table('\n', res, '\n')
-                    connection.end()
                     start()
                 }
             )
@@ -167,55 +167,73 @@ const viewByDepartment = () => {
 }
 
 const viewByManager = () => {
-    let listOfDepartments = []
+    let listOfManagers = ["No Manager"]
     
     connection.query(
-        'SELECT * FROM department',
+        "SELECT CONCAT(first_name, ' ', last_name) AS fullName, employee_id FROM employee WHERE role_id = 3",
         (err, results) => {
             if (err) throw err;
-            var departmentsString = JSON.stringify(results)
-            var parseDepartments= JSON.parse(departmentsString)
-            parseDepartments.forEach(element => {
-                listOfDepartments.push(element.Name)
+            var parseManagers = JSON.parse(JSON.stringify(results))
+            parseManagers.forEach(element => {
+                listOfManagers.push(element.fullName)
             });
-            whichDepartment()
+            whichManager()
         }
+        
     )
 
-    const whichDepartment = () => {
+    const whichManager = () => {
         inquirer
         .prompt([
             {
-                name: 'chooseDepartment',
+                name: 'chooseManager',
                 type: 'list',
-                message: 'Choose department',
-                choices: listOfDepartments
+                message: 'Choose Manager',
+                choices: listOfManagers
             }
         ])
         .then((answer) => {
+            let manager = answer.chooseManager
+            let whereClause = `WHERE CONCAT(m.first_name, ' ', m.last_name) = ?`
+            if (manager == "No Manager") {
+                whereClause = `WHERE CONCAT(m.first_name, ' ', m.last_name) is null`
+            }
             connection.query(
                 `SELECT 
-                employee.employee_id, 
-                CONCAT(employee.first_name, ' ', employee.last_name) as fullName, 
+                e.employee_id, 
+                CONCAT(e.first_name, ' ', e.last_name) as fullName, 
                 role.title as title,
                 role.salary as salary, 
-                department.Name as department
-                From employee
+                department.Name as department,
+                CONCAT(m.first_name, ' ', m.last_name) as Manager
+                From employee e
                 JOIN role
-                ON employee.role_id = role.role_id
+                ON e.role_id = role.role_id
                 JOIN department
                 ON role.department_id = department.department_id
-                WHERE department.Name = ?`,
-                [answer.chooseDepartment],
+                LEFT JOIN employee m
+                ON m.employee_id = e.manager_id
+                ${whereClause}`,
+                [manager],
                 (err, res) => {
                     if (err) throw (err);
                     console.table('\n', res, '\n')
-                    connection.end()
                     start()
                 }
             )
         })
     }
+}
+
+const viewRoles = () => {
+    connection.query(
+        "SELECT * FROM role",
+        (err, res) => {
+            if (err) throw (err);
+            console.table('\n', res, '\n')
+            start()
+        }
+    )
 }
 
 const addEmployee = () => {
@@ -229,7 +247,6 @@ const addEmployee = () => {
             parseRoles.forEach(element => {
                 listOfRoles.push(element.title)
             });
-            connection.end()
         }
     )
 
@@ -242,7 +259,6 @@ const addEmployee = () => {
             parseManagers.forEach(element => {
                 listOfManagers.push(element.fullName)
             });
-            connection.end()
         }
     )
 
@@ -304,7 +320,6 @@ const addEmployee = () => {
                     if (err) throw err;
                     var roleParsed = JSON.parse(JSON.stringify(results))
                     roleId.push(roleParsed[0].role_id)
-                    connection.end()
                     insert()
                 }
             )
@@ -321,13 +336,24 @@ const addEmployee = () => {
                     (err, res) => {
                         if (err) throw err;
                         console.log("Employee Successfully Added")
-                        connection.end()
                         start()
                     }
                 )
             }
 
         })
+}
+
+const removeEmployee = () => {
+
+}
+
+const updateRole = () => {
+
+}
+
+const updateManager = () => {
+    
 }
 
 const addRole = () => {
@@ -378,7 +404,6 @@ const addRole = () => {
                     if (err) throw err;
                     var departmentParsed = JSON.parse(JSON.stringify(results))
                     departmentId.push(departmentParsed[0].department_id)
-                    connection.end()
                     insert()
                 }
             )
@@ -421,6 +446,7 @@ const addDepartment = () => {
                 (err) => {
                     if (err) throw err;
                     console.log("Department Successfully Added")
+                    connection.end()
                     start()
                 }
             )
