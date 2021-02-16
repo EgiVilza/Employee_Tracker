@@ -24,8 +24,6 @@ const start = () => {
                 'View all roles',
                 'Add employee',
                 'Remove employee',
-                'Update employee role',
-                'Update employee manager',
                 'Add Role',
                 'Remove Role',
                 'Add department',
@@ -58,14 +56,6 @@ const start = () => {
 
             case 'Remove employee':
                 removeEmployee()
-                break;
-
-            case 'Update employee role':
-                updateRole()
-                break;
-
-            case 'Update employee manager':
-                updateManager()
                 break;
 
             case 'Add Role':
@@ -179,7 +169,6 @@ const viewByManager = () => {
             });
             whichManager()
         }
-        
     )
 
     const whichManager = () => {
@@ -345,14 +334,42 @@ const addEmployee = () => {
 }
 
 const removeEmployee = () => {
+    //
+    let listOfEmployees = []
 
-}
+    connection.query(
+        "SELECT first_name, employee_id FROM employee",
+        (err, results) => {
+            if (err) throw err;
+            var parseEmployees = JSON.parse(JSON.stringify(results))
+            parseEmployees.forEach(element => {
+                listOfEmployees.push(element.first_name)
+            });
+            chooseEmp()
+        }
+    )
 
-const updateRole = () => {
-
-}
-
-const updateManager = () => {
+    const chooseEmp = () => {
+        inquirer
+        .prompt([
+            {
+                name: 'chooseEmployee',
+                type: 'list',
+                message: 'Delete which employee?',
+                choices: listOfEmployees
+            },
+        ])
+        .then((answer) => {
+            connection.query(
+                `DELETE from employee where first_name = "${answer.chooseEmployee}";`,
+                (err, results) => {
+                    if (err) throw err;
+                    console.log("Employee Removed")
+                    start()
+                }
+            )
+        })
+    }
     
 }
 
@@ -428,6 +445,44 @@ const addRole = () => {
         })
 }
 
+const removeRole = () => {
+
+    let listOfRoles = []
+    connection.query(
+        'SELECT * FROM role',
+        (err, results) => {
+            if (err) throw err;
+            var parseRoles = JSON.parse(JSON.stringify(results))
+            parseRoles.forEach(element => {
+                listOfRoles.push(element.title)
+            });
+            chooseRole()
+        }
+    )
+
+    const chooseRole = () => {
+        inquirer
+        .prompt([
+            {
+                name: 'chooseRole',
+                type: 'list',
+                message: 'Delete which role?',
+                choices: listOfRoles
+            },
+        ])
+        .then((answer) => {
+            connection.query(
+                `DELETE from role where title = "${answer.chooseRole}";`,
+                (err, results) => {
+                    if (err) throw err;
+                    console.log("Role Removed")
+                    start()
+                }
+            )
+        })
+    }
+}
+
 const addDepartment = () => {
     inquirer
         .prompt([
@@ -451,6 +506,43 @@ const addDepartment = () => {
                 }
             )
         })
+}
+
+const removeDepartment = () => {
+    let listOfDepartments = []
+    connection.query(
+        'SELECT * FROM role',
+        (err, results) => {
+            if (err) throw err;
+            var parseDepartments = JSON.parse(JSON.stringify(results))
+            parseDepartments.forEach(element => {
+                listOfDepartments.push(element.Name)
+            });
+            chooseDepartment()
+        }
+    )
+
+    const chooseDepartment = () => {
+        inquirer
+        .prompt([
+            {
+                name: 'chooseRole',
+                type: 'list',
+                message: 'Delete which role?',
+                choices: listOfRoles
+            },
+        ])
+        .then((answer) => {
+            connection.query(
+                `DELETE from department where Name = "${answer.chooseDepartment}";`,
+                (err, results) => {
+                    if (err) throw err;
+                    console.log("Department Removed")
+                    start()
+                }
+            )
+        })
+    }
 }
 
 connection.connect((err) => {
