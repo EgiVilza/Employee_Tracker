@@ -10,6 +10,7 @@ const connection = mysql.createConnection({
     database: 'companyTrackerDB'
 })
 
+//Initiates the application
 const start = () => {
     //Starter Questions
     inquirer
@@ -82,8 +83,9 @@ const start = () => {
     })
 }
 
+//View all employee information (name, manager, id, department, role)
 const viewAll = () => {
-    //Query
+    //Query to view all of the employee information
     connection.query(
         `SELECT 
         e.employee_id, 
@@ -106,9 +108,11 @@ const viewAll = () => {
       });
 }
 
+//View employee information by department
 const viewByDepartment = () => {
+    //list of department array
     let listOfDepartments = []
-    //Query to grap list of departments
+    //Query to grap list of departments and stores them in the listOfDepartments array
     connection.query(
         'SELECT * FROM department',
         (err, results) => {
@@ -121,7 +125,7 @@ const viewByDepartment = () => {
             whichDepartment()
         }
     )
-    //Question
+    //Inquirer to selec which department to view employees from
     const whichDepartment = () => {
         inquirer
         .prompt([
@@ -133,6 +137,7 @@ const viewByDepartment = () => {
             }
         ])
         .then((answer) => {
+            //Query for employee info by department
             connection.query(
                 `SELECT 
                 employee.employee_id, 
@@ -158,9 +163,10 @@ const viewByDepartment = () => {
     
 }
 
+//View employee information by Manager
 const viewByManager = () => {
+    //Query to grab a list of managers and stores them in the listOfManagers array
     let listOfManagers = ["No Manager"]
-    
     connection.query(
         "SELECT CONCAT(first_name, ' ', last_name) AS fullName, employee_id FROM employee WHERE role_id = 3",
         (err, results) => {
@@ -173,6 +179,7 @@ const viewByManager = () => {
         }
     )
 
+    //Inquirer to select which manager to view the list of employee info
     const whichManager = () => {
         inquirer
         .prompt([
@@ -184,6 +191,7 @@ const viewByManager = () => {
             }
         ])
         .then((answer) => {
+            //Change where clause if a valid manager or "No Manager" was chosen
             let manager = answer.chooseManager
             let whereClause = `WHERE CONCAT(m.first_name, ' ', m.last_name) = ?`
             if (manager == "No Manager") {
@@ -216,7 +224,9 @@ const viewByManager = () => {
     }
 }
 
+//View all roles
 const viewRoles = () => {
+    //Query to view all roles in the role table
     connection.query(
         "SELECT * FROM role",
         (err, res) => {
@@ -227,8 +237,9 @@ const viewRoles = () => {
     )
 }
 
+//Add employee to employee table
 const addEmployee = () => {
-    //Store a list of roles into a variable from querying the database
+    //Store a list of roles into a array from the query below
     let listOfRoles = []
     connection.query(
         'SELECT * FROM role',
@@ -241,6 +252,7 @@ const addEmployee = () => {
         }
     )
 
+    //Stores a list of Managers into a variable from the query below
     let listOfManagers = ["No Manager"]
     connection.query(
         "SELECT CONCAT(first_name, ' ', last_name) AS fullName FROM employee WHERE role_id = 3",
@@ -253,6 +265,7 @@ const addEmployee = () => {
         }
     )
 
+    //Inquirer for info to add employee
     inquirer
         .prompt([
             {
@@ -285,7 +298,7 @@ const addEmployee = () => {
             //Stores role id for role into a variable
             let roleId = [];
 
-            //Query to get department id
+            //Query to get manager_id and store it in the managerId variable
             if (answer.managerName != "No Manager") {
                 var spliting = answer.managerName.split(' ')
                 var managerFirstName = spliting[0]
@@ -302,6 +315,7 @@ const addEmployee = () => {
                 )
             }   
             
+            //Query to grab the role_id and stor it in the roldId variable
             connection.query(
                 'SELECT role_id FROM role WHERE ?',
                 {
@@ -326,7 +340,7 @@ const addEmployee = () => {
                     },
                     (err, res) => {
                         if (err) throw err;
-                        console.log("Employee Successfully Added")
+                        console.log("\nEmployee Successfully Added\n")
                         start()
                     }
                 )
@@ -335,10 +349,10 @@ const addEmployee = () => {
         })
 }
 
+//Remove employee from employee table
 const removeEmployee = () => {
-    //
+    //Grabs a list of employees from the query below and stores it into the list of employees array
     let listOfEmployees = []
-
     connection.query(
         "SELECT first_name, employee_id FROM employee",
         (err, results) => {
@@ -351,6 +365,7 @@ const removeEmployee = () => {
         }
     )
 
+    //Inquirer to choose the employee to delete from the employee table
     const chooseEmp = () => {
         inquirer
         .prompt([
@@ -375,8 +390,9 @@ const removeEmployee = () => {
     
 }
 
+//Add role to role table
 const addRole = () => {
-    //Store a list of departments into a variable from querying the database
+    //Store a list of departments into an array from using the query below
     let listOfDepartments = []
     connection.query(
         'SELECT * FROM department',
@@ -390,6 +406,7 @@ const addRole = () => {
         }
     )
 
+    //Inquirer to get the rold infomation and add into to the role table
     inquirer
         .prompt([
             {
@@ -446,8 +463,9 @@ const addRole = () => {
         })
 }
 
+//Remove role from role table
 const removeRole = () => {
-
+    //Stores a list of roles from the role table in a array, using the query below to get the role info
     let listOfRoles = []
     connection.query(
         'SELECT * FROM role',
@@ -461,6 +479,7 @@ const removeRole = () => {
         }
     )
 
+    //Inquirer to select the role to be deleted from the role table
     const chooseRole = () => {
         inquirer
         .prompt([
@@ -484,7 +503,9 @@ const removeRole = () => {
     }
 }
 
+//Add department to department table
 const addDepartment = () => {
+    //Inquirer to get the department name and add it onto the department table
     inquirer
         .prompt([
             {
@@ -508,7 +529,9 @@ const addDepartment = () => {
         })
 }
 
+//Remove department from department table
 const removeDepartment = () => {
+    //Grabs the list of departments from the query below and adds the list to the list of departments array
     let listOfDepartments = []
     connection.query(
         'SELECT * FROM department',
@@ -522,6 +545,7 @@ const removeDepartment = () => {
         }
     )
 
+    //Inquirer to choose which department to delete from the department table
     const chooseDepartment = () => {
         inquirer
         .prompt([
@@ -545,6 +569,7 @@ const removeDepartment = () => {
     }
 }
 
+//When connection is active, it calls the start() function
 connection.connect((err) => {
     if (err) throw err;
     start();
