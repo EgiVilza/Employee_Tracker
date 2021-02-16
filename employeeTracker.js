@@ -11,6 +11,7 @@ const connection = mysql.createConnection({
 })
 
 const start = () => {
+    //Starter Questions
     inquirer
         .prompt([
         {
@@ -82,6 +83,7 @@ const start = () => {
 }
 
 const viewAll = () => {
+    //Query
     connection.query(
         `SELECT 
         e.employee_id, 
@@ -106,7 +108,7 @@ const viewAll = () => {
 
 const viewByDepartment = () => {
     let listOfDepartments = []
-    
+    //Query to grap list of departments
     connection.query(
         'SELECT * FROM department',
         (err, results) => {
@@ -119,7 +121,7 @@ const viewByDepartment = () => {
             whichDepartment()
         }
     )
-
+    //Question
     const whichDepartment = () => {
         inquirer
         .prompt([
@@ -436,7 +438,6 @@ const addRole = () => {
                     (err, res) => {
                         if (err) throw err;
                         console.log("Role Successfully Added")
-                        connection.end()
                         start()
                     }
                 )
@@ -501,7 +502,6 @@ const addDepartment = () => {
                 (err) => {
                     if (err) throw err;
                     console.log("Department Successfully Added")
-                    connection.end()
                     start()
                 }
             )
@@ -511,7 +511,7 @@ const addDepartment = () => {
 const removeDepartment = () => {
     let listOfDepartments = []
     connection.query(
-        'SELECT * FROM role',
+        'SELECT * FROM department',
         (err, results) => {
             if (err) throw err;
             var parseDepartments = JSON.parse(JSON.stringify(results))
@@ -526,10 +526,10 @@ const removeDepartment = () => {
         inquirer
         .prompt([
             {
-                name: 'chooseRole',
+                name: 'chooseDepartment',
                 type: 'list',
                 message: 'Delete which role?',
-                choices: listOfRoles
+                choices: listOfDepartments
             },
         ])
         .then((answer) => {
@@ -537,7 +537,7 @@ const removeDepartment = () => {
                 `DELETE from department where Name = "${answer.chooseDepartment}";`,
                 (err, results) => {
                     if (err) throw err;
-                    console.log("Department Removed")
+                    console.log("\nDepartment Removed\n")
                     start()
                 }
             )
