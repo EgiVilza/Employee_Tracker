@@ -2,7 +2,7 @@
 
 ## Description
 
-To use the consol terminal to modify the employee database in the company.
+This project is to demonstrate a employee management system that has the functionality to view, add, and remove employees/departments/roles through the use of mysql and npm inquirer (by using the console terminal). Three tables are created in the mysql database (employees/departments/roles) and foreign keys are used to display the relationship of the employee with the manager, department, and role.
 
 # Table of Contents
 
