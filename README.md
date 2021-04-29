@@ -6,17 +6,19 @@ This project is to demonstrate a employee management system that has the functio
 
 # Table of Contents
 
+* [Screenshot](#screenshot)
+
 * [Installation](#installation)
+
+* [Built With](#builtwith)
 
 * [License](#license)
 
-* [Contributing](contributing)
-
-* [Usage](#usage)
-
-* [Tests](#tests)
-
 * [Questions](#questions)
+
+## Screenshot
+
+![alt text](EmployeeManagementSystem.png)
 
 ## Installation
 
@@ -26,25 +28,16 @@ To install necessary dependencies, run the following command:
 npm i
 ''
 
+## Built With
+
+* Javascript
+* Node Inquirer
+* mysql
+* schema
+
 ## License
 
-This projects is licensed under the None license.
-
-## Contributing
-
-NA
-
-## Usage
-
-NA
-
-## Tests
-
-To run tests, rund the following command:
-
-''
-NA
-''
+This projects is licensed under the MIT license.
 
 ## Questions
 
