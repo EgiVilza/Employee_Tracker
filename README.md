@@ -8,6 +8,8 @@ This project is to demonstrate a employee management system that has the functio
 
 * [Screenshot](#screenshot)
 
+* [Video](#video)
+
 * [Installation](#installation)
 
 * [Built With](#builtwith)
@@ -19,6 +21,10 @@ This project is to demonstrate a employee management system that has the functio
 ## Screenshot
 
 ![alt text](EmployeeManagementSystem.png)
+
+## Video
+
+Video Link: https://drive.google.com/file/d/1KqPml_ouI3hD3j_BG7UQglMA5ib2R-ru/view
 
 ## Installation
 
@@ -32,8 +38,8 @@ npm i
 
 * Javascript
 * Node Inquirer
-* mysql
-* schema
+* MySQL
+* Console Table
 
 ## License
 
