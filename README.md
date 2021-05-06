@@ -36,7 +36,7 @@ npm i
 
 ## Built With
 
-* Javascript
+* JavaScript
 * Node Inquirer
 * MySQL
 * Console Table
